@@ -175,42 +175,52 @@ export class PropertyService extends BaseRepository<Property> {
     const states: any = await this.masterService.getStates();
     const state = states.find((state) => state.id === retVal.state);
     if (state) {
-      const cities: any = await this.masterService.getCities(state.id);
-      const city = cities.find((c) => c.id === retVal.city);
-      const address =
-        retVal.address +
-        ', ' +
-        state.name +
-        ', ' +
-        city.name +
-        ', ' +
-        retVal.zip_code;
+      try {
+        const cities: any = await this.masterService.getCities(state.id);
+        const city = cities.find((c) => c.id === retVal.city);
+        const address =
+          retVal.address +
+          ', ' +
+          state.name +
+          ', ' +
+          city.name +
+          ', ' +
+          retVal.zip_code;
 
-      const geocodeResponse = await this.getGeocode(address);
-      const location = geocodeResponse?.items?.[0]?.position;
-      if (!location) throw new Error('Invalid geocode response');
-      const full_address = geocodeResponse?.items?.[0]?.title;
-      const property_unique_id = geocodeResponse?.items?.[0]?.id;
-      const { lat, lng } = location;
+        const geocodeResponse = await this.getGeocode(address);
+        const location = geocodeResponse?.items?.[0]?.position;
+        if (!location) throw new Error('Invalid geocode response');
+        const full_address = geocodeResponse?.items?.[0]?.title;
+        const property_unique_id = geocodeResponse?.items?.[0]?.id;
+        const { lat, lng } = location;
 
-      await this._repository
-        .createQueryBuilder()
-        .update(Property)
-        .set({
-          geocode_response: () => `:geocode_response::jsonb`,
-          geocode: () => `ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)`, // POINT(longitude, latitude)
-          full_address: () => `:full_address`,
-          property_unique_id: () => `:property_unique_id`,
-        })
-        .where('id = :propertyId', { propertyId: retVal.id })
-        .setParameters({
-          geocode_response: JSON.stringify(geocodeResponse),
-          lat,
-          lng,
-          full_address,
-          property_unique_id,
-        })
-        .execute();
+        await this._repository
+          .createQueryBuilder()
+          .update(Property)
+          .set({
+            geocode_response: () => `:geocode_response::jsonb`,
+            geocode: () => `ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)`, // POINT(longitude, latitude)
+            full_address: () => `:full_address`,
+            property_unique_id: () => `:property_unique_id`,
+          })
+          .where('id = :propertyId', { propertyId: retVal.id })
+          .setParameters({
+            geocode_response: JSON.stringify(geocodeResponse),
+            lat,
+            lng,
+            full_address,
+            property_unique_id,
+          })
+          .execute();
+      } catch (exception) {
+        // Geocoding is an enrichment step (map pin / full_address), not core
+        // property data - the property row above is already saved by this
+        // point. Failing here (e.g. no/invalid HERE_API_KEY, HERE returning
+        // a 401) used to propagate straight through as this endpoint's own
+        // response status, which made a missing third-party API key look
+        // exactly like the user's own session had expired.
+        console.error('Geocoding failed, property saved without it:', exception);
+      }
     }
     await this.syncUserTags(data.userId);
     return retVal;

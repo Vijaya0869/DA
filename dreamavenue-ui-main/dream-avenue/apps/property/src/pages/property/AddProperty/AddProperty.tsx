@@ -218,7 +218,9 @@ const AddProperty = (props: any) => {
     title: Yup.string().required("Property Name is required"),
     description: Yup.string().required("Description is required"),
     tags_n_labels: Yup.string().required("Tags & Labels are required"),
-    investment_strategy_id: Yup.string(),
+    investment_strategy_id: Yup.string().required(
+      "Investment Strategy is required"
+    ),
     address: Yup.string().required("Street Address required"),
     state: Yup.string().required("State required"),
     city: Yup.string().required("City required"),
