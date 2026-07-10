@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { FiChevronDown, FiChevronRight, FiMenu, FiX } from "react-icons/fi";
-import { FaHome, FaChartPie, FaBullhorn, FaFileAlt, FaCogs } from "react-icons/fa";
-import { IoIosArrowBack, IoIosArrowForward, IoIosStats } from "react-icons/io";
+import { FiChevronDown, FiChevronRight } from "react-icons/fi";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import React from "react";
 import Logo from "../Logo";
-import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Explore from '@/assets/images/explore.svg';
 import ExploreN from '@/assets/images/explore_n.svg';
