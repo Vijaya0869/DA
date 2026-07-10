@@ -739,9 +739,9 @@ export class PropertyService extends BaseRepository<Property> {
   ): void {
     if (searchKey) {
       query.andWhere(
-        `(address LIKE :searchKeyStr or title LIKE :searchKeyStr or full_address LIKE :searchKeyStr)`,
+        `(address ILIKE :searchKeyStr or title ILIKE :searchKeyStr or full_address ILIKE :searchKeyStr)`,
         {
-          ['searchKeyStr']: `%${searchKey.toLowerCase()}%`,
+          ['searchKeyStr']: `%${searchKey}%`,
         },
       );
     }

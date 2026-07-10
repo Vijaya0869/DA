@@ -13,7 +13,7 @@ import { HiOutlineHomeModern } from "react-icons/hi2";
 import PropertyTop from "@/assets/images/propertyTop.svg";
 import "./propertyList.css";
 import { AiOutlineLike, AiOutlineCloseCircle } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import PropertyServices from "../../../Services/property";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -108,11 +108,13 @@ const PropertyList: React.FC = () => {
   const [selectedStrategy, setSelectedStrategy] = useState<string | null>(null);
   const pageSize = 10;
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null
   );
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const toggleCompare = (propertyId: string) => {
     setCompareIds((prev) =>
@@ -150,6 +152,18 @@ const PropertyList: React.FC = () => {
   useEffect(() => {
     getInvestmentStrategies();
   }, []);
+
+  // Pick up ?search= when navigated here client-side (e.g. from the header
+  // search bar) - the component doesn't remount on a same-route query change,
+  // so the useState initializer alone won't catch it.
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    if (urlSearch !== search) {
+      setSearch(urlSearch);
+      setDebouncedSearch(urlSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Fetch properties when dependencies change
   useEffect(() => {

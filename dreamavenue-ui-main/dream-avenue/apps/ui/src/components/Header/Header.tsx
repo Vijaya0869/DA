@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     const userObj = localStorage.getItem("user");
@@ -30,12 +31,19 @@ const Header = () => {
 
   return (
     <div className="flex justify-between items-center p-4 rounded-lg shadow-sm bg-[#f7f7fd] ">
-      {/* Search Bar */}
+      {/* Search Bar - searches properties by address */}
       <div className="relative w-1/3">
         <FiSearch className="absolute left-3 top-4 text-gray-500" />
         <input
           type="text"
-          placeholder="Search"
+          placeholder="Search properties"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && query.trim()) {
+              navigate(`/property?search=${encodeURIComponent(query.trim())}`);
+            }
+          }}
           className="w-full pl-10 pr-4 py-3 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-200"
         />
       </div>
