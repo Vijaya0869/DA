@@ -1425,7 +1425,10 @@ const AddProperty = (props: any) => {
       }
       const Finacing = withoutId.map((field: any) => ({
         interest_rate: Number(field.interest_rate) || 0,
-        financing_of_type_id: String(field.financing_of_type_id),
+        financing_of_type_id:
+          field.financing_of_type_id != ""
+            ? String(field.financing_of_type_id)
+            : null,
         down_payment_type: String(field.down_payment_type),
         property_id: String(newpropertyId) || String(mergedData.id),
         down_payment: Number(field.down_payment) || 0,
