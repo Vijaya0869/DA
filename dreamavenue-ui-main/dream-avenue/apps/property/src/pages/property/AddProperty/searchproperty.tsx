@@ -105,6 +105,7 @@ const Searchproperty = () => {
           yearBuilt: item.yearBuilt || "N/A",
           lotSize: item.lotSize || "N/A",
           numberOfFloors: item.numberOfFloors || "N/A",
+          raw: item,
         }))
       );
       setShowResults(true);
@@ -121,6 +122,25 @@ const Searchproperty = () => {
 
   const handlePropertyCancel = () => {
     setSelectedProperty(null);
+  };
+
+  const handleSaveProperty = () => {
+    // Deliberately don't pass through `id`, `state`, or `city` as-is: those
+    // come from the raw search result (the third-party data source's own id,
+    // a 2-letter state code, a plain city name), not the database UUIDs that
+    // AddProperty's edit-existing-property flow expects them to be. Passing
+    // them through causes it to treat this as an *existing* saved property
+    // and immediately fire cost/document/city lookups against those bogus
+    // ids, which 500s. Let the user pick State/City from the dropdown as
+    // normal (that path already works) instead of forcing broken values in.
+    const raw = selectedProperty.raw || {};
+    const {
+      id: _id,
+      state: _state,
+      city: _city,
+      ...propertyDetails
+    } = raw;
+    navigate("/add-property", { state: { propertyDetails } });
   };
 
   const handleShowMoreClick = () => {
@@ -387,7 +407,10 @@ const Searchproperty = () => {
               <BiArrowBack className="text-lg mr-1" />
               Property Search
             </button>
-            <button className="bg-blue-600 text-white py-2 px-4 rounded-lg">
+            <button
+              onClick={handleSaveProperty}
+              className="bg-blue-600 text-white py-2 px-4 rounded-lg"
+            >
               Save Property
             </button>
           </div>

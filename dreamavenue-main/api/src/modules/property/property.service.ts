@@ -26,6 +26,7 @@ import { PropertyDetailsDto } from './dto/property-details.dto';
 import { CreateRehabCostsDto } from './dto/create-rehab-costs.dto';
 import { RentcastService } from '../analysis/rentcast.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
+import { UserTags } from '../user/entities/user_tags.entity';
 import axios from 'axios';
 import { json } from 'express';
 
@@ -545,30 +546,37 @@ export class PropertyService extends BaseRepository<Property> {
   }
 
   async syncUserTags(user_id: string) {
-    await this.dataSource.manager.query(
+    // Note: this used to be a single `MERGE INTO` statement, but MERGE was
+    // only added in Postgres 15 - this app runs on Postgres 13 (see
+    // docker-compose.yml), so it always threw a syntax error, meaning every
+    // property create/update 500'd here even though the property itself had
+    // already been saved successfully moments earlier in the same call.
+    const [row] = await this.dataSource.manager.query(
       `
-          MERGE INTO user_tags AS ut
-      USING (
-        SELECT
-          "userId",
-          string_agg(DISTINCT trim(tag), ', ' ORDER BY trim(tag)) AS merged_tags
+        SELECT string_agg(DISTINCT trim(tag), ', ' ORDER BY trim(tag)) AS merged_tags
         FROM (
-          SELECT "userId", unnest(string_to_array(tags_n_labels, ',')) AS tag
+          SELECT unnest(string_to_array(tags_n_labels, ',')) AS tag
           FROM property
           WHERE tags_n_labels IS NOT NULL
             AND "userId" = $1
         ) AS split_tags
-        GROUP BY "userId"
-      ) AS merged_data
-      ON ut.user_id = merged_data."userId"
-      WHEN MATCHED THEN
-        UPDATE SET tags = merged_data.merged_tags
-      WHEN NOT MATCHED THEN
-        INSERT (user_id, tags)
-        VALUES (merged_data."userId", merged_data.merged_tags);
       `,
       [user_id],
     );
+    const mergedTags = row?.merged_tags;
+    if (!mergedTags) {
+      return;
+    }
+
+    const userTagsRepository = this.dataSource.getRepository(UserTags);
+    const existing = await userTagsRepository.findOne({
+      where: { userId: user_id },
+    });
+    if (existing) {
+      await userTagsRepository.update({ userId: user_id }, { tags: mergedTags });
+    } else {
+      await userTagsRepository.insert({ userId: user_id, tags: mergedTags });
+    }
   }
 
   async pullPropertyDetails(address: string) {

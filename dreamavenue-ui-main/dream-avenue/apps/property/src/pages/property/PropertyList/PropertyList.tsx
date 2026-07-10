@@ -113,6 +113,22 @@ const PropertyList: React.FC = () => {
   );
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const toggleCompare = (propertyId: string) => {
+    setCompareIds((prev) =>
+      prev.includes(propertyId)
+        ? prev.filter((id) => id !== propertyId)
+        : [...prev, propertyId]
+    );
+  };
+  const handleCompareClick = () => {
+    if (compareIds.length < 2) {
+      alert("Select at least 2 properties to compare.");
+      return;
+    }
+    const selected = properties.filter((p) => compareIds.includes(p.id));
+    navigate("/property/compare", { state: { properties: selected } });
+  };
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(
     null
   );
@@ -393,6 +409,14 @@ const PropertyList: React.FC = () => {
       onMouseEnter={() => setHoveredPropertyId(property.id)}
       onMouseLeave={() => setHoveredPropertyId(null)}
     >
+      <input
+        type="checkbox"
+        checked={compareIds.includes(property.id)}
+        onChange={() => toggleCompare(property.id)}
+        onClick={(e) => e.stopPropagation()}
+        title="Select to compare"
+        className="w-4 h-4 flex-shrink-0 cursor-pointer accent-main"
+      />
       <div className="w-36 h-28 flex-shrink-0 sm:block">
        {property?.thumbnail_image?.url ? <img
           src={property?.thumbnail_image?.url }
@@ -627,9 +651,12 @@ const PropertyList: React.FC = () => {
               </select>
             </div> */}
                 <div className="flex space-x-3">
-                  <button className="flex items-center space-x-2 bg-[#E4BB67] text-white px-4 py-2 rounded-lg shadow hover:bg-[#b9964f] transition">
+                  <button
+                    onClick={handleCompareClick}
+                    className="flex items-center space-x-2 bg-[#E4BB67] text-white px-4 py-2 rounded-lg shadow hover:bg-[#b9964f] transition"
+                  >
                     <img src={CompareIcon}></img>
-                    <span>Compare</span>
+                    <span>Compare{compareIds.length > 0 ? ` (${compareIds.length})` : ""}</span>
                   </button>
 
                   <Button
