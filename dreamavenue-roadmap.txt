@@ -1,0 +1,150 @@
+DREAM AVENUE — PROJECT ROADMAP
+Prepared: 2026-07-07
+Basis: full audit of dreamavenue-main (backend) and dreamavenue-ui-main (frontend),
+plus live testing of the signup/login/email flow against a locally running backend.
+
+Estimates assume one developer working full-time, already familiar with this
+codebase. They will compress with more developers on parallelizable work, and
+expand if requirements turn out to be bigger than they look from the outside.
+
+
+================================================================================
+PHASE 1 — CRITICAL FIXES (do first)
+================================================================================
+
+1. Lock down API authorization                                    2–3 days
+   Why: JwtAuthGuard exists in the codebase but is applied to zero
+   controllers. Master, Analysis, and Static controllers currently have
+   NO auth check at all — anyone can call them.
+
+2. Fix Google OAuth                                                0.5–1 day
+   Why: The Google strategy returns the raw provider profile instead of
+   calling validateOAuthLogin, so it never creates/looks up a User row.
+   Login silently produces a token with userId: undefined.
+   Facebook OAuth already does this correctly — same fix, different file.
+
+3. Fix user search/filter crash                                   1 day
+   Why: GET /users/GetUsersList throws "Method not implemented" the
+   moment anyone passes a search term or filter.
+
+4. Restore password-strength validation                           0.5 day
+   Why: Validation decorators on "currentpassword" in the reset-password
+   DTO are commented out.
+
+5. Remove or properly rewire the broken background email queue    0.5–1 day
+   Why: Uses the wrong queue library's decorators (@nestjs/bull instead
+   of @nestjs/bullmq), is never registered as a provider so it never
+   runs, and even if it did run it discards the actual email content
+   (to/subject/body) before sending.
+
+                                                    SUBTOTAL: ~5–7 days
+
+
+================================================================================
+PHASE 2 — FINISH WHAT'S HALF-BUILT
+================================================================================
+
+1. Bulk property upload                                           3–5 days
+   Why: No controller, no module, not registered in app.module.ts at
+   all. The one method that exists (triggerUpload) is an empty function
+   body. Its repository injection is copy-pasted wrong (points at the
+   Property repository instead of BulkUploadSession). DB tables already
+   exist and are unreachable via HTTP.
+
+2. File storage decision                                    0.5–4 days
+   Why: A full pluggable storage abstraction (FileBlobService /
+   IBlobStorage) was built for swapping local-disk storage for
+   cloud storage later, but it's never actually used anywhere — all
+   real uploads bypass it and write straight to local disk.
+   Option A: delete the dead code and keep local disk on purpose (0.5 day)
+   Option B: wire it up to real cloud storage, e.g. S3-compatible (3–4 days)
+
+3. Refresh-token flow                                              1–2 days
+   Why: Only a single 1-day access token exists today. No refresh
+   endpoint or refresh-token storage.
+
+4. Dev environment cleanup                                         1 day
+   Why: docker-compose.yml's Grafana/Prometheus services mount config
+   files (./monitoring/*) that don't exist in the repo, so those two
+   services fail to start as-is. No .env.example exists anywhere,
+   despite ~20 required environment variables across DB, Redis, JWT,
+   SMTP, and three third-party API keys.
+
+                                                   SUBTOTAL: ~6–12 days
+
+
+================================================================================
+PHASE 3 — SAFETY NET (TESTING)
+================================================================================
+
+1. Unit tests for auth / property / analysis services              5–8 days
+   Why: Currently only 2 trivial boilerplate tests exist in the entire
+   backend (a default "Hello World" test and a "service is defined"
+   check). Auth, property, analysis, report, and queue all have zero
+   coverage.
+
+2. End-to-end tests for the critical path                          2–3 days
+   Why: Signup -> login -> add property -> generate report is the path
+   we just proved works by hand in this session. It should be automated
+   so it doesn't silently break again.
+
+3. Wire CI to actually run tests                                   0.5–1 day
+   Why: .woodpecker.yml currently only runs "npm install" and
+   "npm run build" — it never runs a test suite, so broken code can
+   merge without anyone noticing.
+
+                                                 SUBTOTAL: ~7.5–12 days
+
+
+--------------------------------------------------------------------------------
+FIX + COMPLETE + TEST EVERYTHING THAT ALREADY EXISTS: ROUGHLY 18–31 DAYS TOTAL
+--------------------------------------------------------------------------------
+
+
+================================================================================
+PHASE 4 — NEW FEATURES (needs your input — these are leads, not a spec)
+================================================================================
+
+No product roadmap was provided, so nothing here is being guessed blind —
+these are three features where the DATABASE SCHEMA already reveals unbuilt
+product surface: tables exist in Postgres with NO backend module or
+controller at all, and each one matches something already sitting in the
+live UI (a sidebar link or hero copy) with nothing behind it.
+
+1. Fractional Investment                                    5–8 days (basic)
+   Evidence: "fractional_investment" DB table exists. "Fractional
+   Investment" link already exists in the property-app sidebar nav.
+   Zero backend code anywhere.
+
+2. Marketing Campaigns                                       4–6 days (basic)
+   Evidence: "marketing_campaign" and "campaign_property" DB tables
+   exist. "Marketing" link already exists in the sidebar nav.
+   Zero backend code anywhere.
+
+3. AI-powered property analysis                          5–10+ days (basic)
+   Evidence: "ai_analysis_queue" and "ai_analysis_result" DB tables
+   exist. The homepage hero already advertises "Our AI-driven insights
+   engine analyzes hundreds of properties..." Zero backend code anywhere.
+   Range depends heavily on scope: a rules-based scoring pass is on the
+   low end; real LLM-based analysis with a queue/worker pipeline is on
+   the high end.
+
+These estimates are rough placeholders until scope is actually defined —
+treat Phase 4 as a conversation to have, not a committed plan.
+
+
+================================================================================
+CONTEXT: WHAT WAS ALREADY FIXED THIS SESSION
+================================================================================
+
+- Stood up a full local backend stack (Postgres+PostGIS, Redis, MailHog,
+  NestJS API) so account creation/login/email can actually be tested,
+  since the remote server this app was pointed at (test.dreamavenue.ai)
+  is down (502 Bad Gateway).
+- Fixed a real .env-loading-order bug in main.ts that silently broke
+  SMTP configuration for anyone who hit it.
+- Fixed a real bug where the mail library's "default from address"
+  config was silently ignored, breaking every outgoing email.
+- Re-pointed the frontend at the local backend and confirmed the full
+  signup -> welcome email -> property dashboard flow works end-to-end
+  in a real browser.

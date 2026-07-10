@@ -1,0 +1,38 @@
+[
+  {
+    "id": "b797d6c8-b434-463d-9e92-2a9e0c94a365",
+    "name": "Commercial",
+    "code": "COM"
+  },
+  {
+    "id": "5339b319-cc4c-46fe-9875-7adda85efe3a",
+    "name": "Condo",
+    "code": "CON"
+  },
+  {
+    "id": "7888653e-0654-452a-8710-33100e8918a2",
+    "name": "House",
+    "code": "HOU"
+  },
+  {
+    "id": "9e52cc30-b442-4299-a20b-1c1b8d62108a",
+    "name": "Manufactured",
+    "code": "MAN"
+  },
+  {
+    "id": "04c3b9b6-7d29-424c-85a3-0a4ec843d4d1",
+    "name": "Multi-Family",
+    "code": "MUL"
+  },
+  {
+    "id": "5c0795b3-c12c-4f12-809f-36fc2f80632e",
+    "name": "Land",
+    "code": "LND"
+  },
+  {
+    "id": "59f0b9db-5802-4d9c-9708-4b04a2d0a376",
+    "name": "Other",
+    "code": "OTH"
+  }
+]
+

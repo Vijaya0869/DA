@@ -1,0 +1,137 @@
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg h-100">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="card-title fw-bold m-0">Property Appreciation</h4>
+      </div>
+
+      <div class="chart-container" style="height: 350px;">
+        <canvas id="appreciationChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Sample data for the chart, mimicking the trend in the image
+    const chartData = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      datasets: [{
+        label: 'Appreciation Value',
+        data: [20000, 21000, 20800, 21200, 20000, 19500, 20800, 22500, 22000, 22900, 23500, 24500], // Sample values
+        borderColor: '#fd7e14', // A distinct color, similar to the image
+        backgroundColor: 'transparent',
+        pointBackgroundColor: '#fd7e14',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fd7e14',
+        pointHoverBorderColor: '#fd7e14',
+        tension: 0.3, // Smooths the line
+        borderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      }],
+    };
+
+    const config = {
+      type: 'line',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            grid: {
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              color: 'rgba(0,0,0,0.05)', // Light grid lines
+            },
+          },
+          y: {
+            beginAtZero: false,
+            title: {
+              display: true,
+              text: 'Appreciation',
+              color: '#6c757d',
+            },
+            ticks: {
+              callback: function(value) {
+                return '$' + (value / 1000) + 'k'; // Format as $Xk
+              },
+              color: '#6c757d',
+            },
+            grid: {
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              color: 'rgba(0,0,0,0.05)', // Light grid lines
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: false, // Hide the dataset legend
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += '$' + context.parsed.y.toLocaleString();
+                }
+                return label;
+              },
+            },
+          },
+          // Custom plugin for the vertical line and label at 'Apr'
+          annotation: {
+            annotations: {
+              line1: {
+                type: 'line',
+                mode: 'vertical',
+                scaleID: 'x',
+                value: 'Apr', // X-axis label where the line appears
+                borderColor: '#ffc107', // Bootstrap warning color
+                borderWidth: 1,
+                borderDash: [5, 5],
+                label: {
+                  content: '$21,000 Appreciation Value', // Text for the label
+                  enabled: true,
+                  position: 'start',
+                  backgroundColor: 'rgba(255,255,255,0.7)',
+                  font: {
+                    size: 10,
+                  },
+                  color: '#343a40',
+                  xAdjust: 50, // Adjust position horizontally
+                  yAdjust: 0, // Adjust position vertically
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    // Initialize the chart
+    const appreciationChart = new Chart(
+      document.getElementById('appreciationChart'),
+      config,
+    );
+
+    // Handle the switch for "Histogram"
+    document.getElementById('histogramSwitch').addEventListener('change', function(event) {
+      if (event.target.checked) {
+        // Change chart type to 'bar' for histogram
+        appreciationChart.config.type = 'bar';
+      } else {
+        // Change chart type back to 'line'
+        appreciationChart.config.type = 'line';
+      }
+      appreciationChart.update();
+    });
+  });
+</script>

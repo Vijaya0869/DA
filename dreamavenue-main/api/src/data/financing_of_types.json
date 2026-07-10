@@ -1,0 +1,22 @@
+[
+  {
+    "id": "ed8d0c8e-e8ce-4289-8bf4-3539f06b62f2",
+    "name": "Conventional Loan",
+    "code": "CL"
+  },
+  {
+    "id": "0c0c76b8-b461-4a70-a920-28082cc9c7da",
+    "name": "FHA Loan",
+    "code": "FHA"
+  },
+  {
+    "id": "7a6109cc-fe60-4e65-8b8c-f3b37ec319b6",
+    "name": "VA Loan",
+    "code": "VA"
+  },
+  {
+    "id": "6816e871-2c0b-4607-9dd7-6b403be7743f",
+    "name": "USDA Loan",
+    "code": "USDA"
+  }
+]

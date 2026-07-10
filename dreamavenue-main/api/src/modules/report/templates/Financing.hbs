@@ -1,0 +1,41 @@
+
+
+<!-- Section 9: Financial Ratios (with calculated values) -->
+<div class="col-8">
+  <div class="card shadow-sm rounded-lg p-4">
+    <h5 class="card-title mb-3">Property Financial Ratios</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped mb-0">
+        <thead class="bg-light">
+        <tr>
+          <th scope="col" class="px-3 py-2 text-start text-muted text-uppercase">Ratio</th>
+          <th scope="col" class="px-3 py-2 text-start text-muted text-uppercase">Value</th>
+          <th scope="col" class="px-3 py-2 text-start text-muted text-uppercase">Benchmark</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="px-3 py-2 text-nowrap font-weight-medium text-dark">Loan to Cost</td>
+          <td class="px-3 py-2 text-nowrap text-gray-700">{{#if loan_to_cost}}{{loan_to_cost}}%{{else}}N/A{{/if}}</td>
+          <td class="px-3 py-2 text-nowrap text-gray-500">70-80%</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2 text-nowrap font-weight-medium text-dark">Loan to Value</td>
+          <td class="px-3 py-2 text-nowrap text-gray-700">{{#if loan_to_value}}{{loan_to_value}}%{{else}}N/A{{/if}}</td>
+          <td class="px-3 py-2 text-nowrap text-gray-500">75-85%</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2 text-nowrap font-weight-medium text-dark">Price per Sq/Ft</td>
+          <td class="px-3 py-2 text-nowrap text-gray-700">${{formatDecimal price_per_square_foot}}</td>
+          <td class="px-3 py-2 text-nowrap text-gray-500">Market Dependent</td>
+        </tr>
+        <tr>
+          <td class="px-3 py-2 text-nowrap font-weight-medium text-dark">Rehab per Sq/Ft</td>
+          <td class="px-3 py-2 text-nowrap text-gray-700">${{formatDecimal rehab_per_square_foot}}</td>
+          <td class="px-3 py-2 text-nowrap text-gray-500">$20-50</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

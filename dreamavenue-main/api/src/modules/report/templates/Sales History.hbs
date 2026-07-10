@@ -1,0 +1,36 @@
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg overflow-hidden">
+    <div class="card-body">
+      <h4 class="card-title fw-bold mb-4">Sales History</h4>
+
+      <div>
+        <div class="tab-pane fade show active" id="table" role="tabpanel" aria-labelledby="table-tab">
+          <div class="table-responsive">
+            <table class="table table-borderless">
+              <thead class="text-muted text-uppercase small">
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Sale Price</th>
+                <th scope="col">Buyer</th>
+                <th scope="col">Seller</th>
+                <th scope="col">Document Number</th>
+              </tr>
+              </thead>
+              <tbody>
+              {{#each sourceData.salesHistory}}
+                <tr>
+                  <td class="fw-bold">{{saleDate}}</td>
+                  <td>${{formatNumber salePrice}}</td>
+                  <td>{{buyerContactName}}</td>
+                  <td>{{sellerContactName}}</td>
+                  <td>{{bookNO}}-{{documentType}}</td>
+                </tr>
+              {{/each}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

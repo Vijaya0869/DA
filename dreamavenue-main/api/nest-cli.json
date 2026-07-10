@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "assets": [
+      "data/**/*",
+      "views/**/*.hbs",
+      "public/**/*",
+      "templates/**/*.hbs",
+      "modules/report/**/*.hbs"
+    ],
+    "watchAssets": true,
+    "deleteOutDir": true
+  }
+}

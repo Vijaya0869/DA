@@ -1,0 +1,103 @@
+<!-- Card container for the 'Customise Analysis' section -->
+<div class="card custom-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-semibold mb-0">Customise Analysis</h5>
+    <button class="btn btn-sensitivity d-flex align-items-center">
+      <i class="bi bi-bar-chart-fill me-2"></i>
+      Sensitivity Analysis
+    </button>
+  </div>
+
+  <div class="row g-4">
+    <!-- Purchase Price -->
+    <div class="col-md-6">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label for="purchasePriceSlider" class="form-label mb-0">Purchase Price <i class="bi bi-info-circle small ms-1 text-muted"></i></label>
+        <span class="fw-bold text-success" id="purchasePriceValue">$2,346</span>
+      </div>
+      <input type="range" class="custom-slider-track form-range" id="purchasePriceSlider" min="1000" max="10000" value="2346">
+    </div>
+
+    <!-- Closing Costs -->
+    <div class="col-md-6">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label for="closingCostsSlider" class="form-label mb-0">Closing Costs <i class="bi bi-info-circle small ms-1 text-muted"></i></label>
+        <span class="fw-bold text-success" id="closingCostsValue">$28</span>
+      </div>
+      <input type="range" class="custom-slider-track form-range" id="closingCostsSlider" min="10" max="100" value="28">
+    </div>
+
+    <!-- Property Taxes -->
+    <div class="col-md-6">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label for="propertyTaxesSlider" class="form-label mb-0">Property Taxes <i class="bi bi-info-circle small ms-1 text-muted"></i></label>
+        <span class="fw-bold text-success" id="propertyTaxesValue">$0/year</span>
+      </div>
+      <input type="range" class="custom-slider-track form-range" id="propertyTaxesSlider" min="0" max="500" value="0">
+    </div>
+
+    <!-- Insurance -->
+    <div class="col-md-6">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label for="insuranceSlider" class="form-label mb-0">Insurance <i class="bi bi-info-circle small ms-1 text-muted"></i></label>
+        <span class="fw-bold text-success" id="insuranceValue">$0/year</span>
+      </div>
+      <input type="range" class="custom-slider-track form-range" id="insuranceSlider" min="0" max="500" value="0">
+    </div>
+
+    <!-- Rent -->
+    <div class="col-md-6">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label for="rentSlider" class="form-label mb-0">Rent <i class="bi bi-info-circle small ms-1 text-muted"></i></label>
+        <span class="fw-bold text-success" id="rentValue">$4,800</span>
+      </div>
+      <input type="range" class="custom-slider-track form-range" id="rentSlider" min="1000" max="8000" value="4800">
+    </div>
+
+    <!-- After Repair Value -->
+    <div class="col-md-6">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label for="arvSlider" class="form-label mb-0">After Repair Value <i class="bi bi-info-circle small ms-1 text-muted"></i></label>
+        <span class="fw-bold text-success" id="arvValue">$1,000,000</span>
+      </div>
+      <input type="range" class="custom-slider-track form-range" id="arvSlider" min="500000" max="1500000" value="1000000">
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // JavaScript to update slider values and dynamic background
+  const sliders = document.querySelectorAll('input[type="range"]');
+  // Function to update the background of a single slider
+  const updateSliderBackground = (slider) => {
+    const min = slider.min ? slider.min : 0;
+    const max = slider.max ? slider.max : 100;
+    const value = slider.value;
+    const percentage = ((value - min) / (max - min)) * 100;
+
+  };
+
+  sliders.forEach(slider => {
+    // Update the display value
+    const updateDisplayValue = (e) => {
+      const valueSpan = document.getElementById(e.target.id.replace('Slider', 'Value'));
+      let displayValue = Number(e.target.value);
+      if (e.target.id.includes('Price') || e.target.id.includes('Costs') || e.target.id.includes('Rent') || e.target.id.includes('arv')) {
+        valueSpan.textContent = `$${displayValue.toLocaleString()}`;
+      } else if (e.target.id.includes('Taxes') || e.target.id.includes('Insurance')) {
+        valueSpan.textContent = `$${displayValue.toLocaleString()}/year`;
+      }
+    };
+
+    // Initial update on page load
+    updateDisplayValue({ target: slider });
+    updateSliderBackground(slider);
+
+    // Add event listener for real-time updates
+    slider.addEventListener('input', (e) => {
+      updateDisplayValue(e);
+      updateSliderBackground(e.target);
+    });
+  });
+</script>

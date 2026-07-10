@@ -1,0 +1,14 @@
+.sect {
+  padding: 70px 100px;
+  gap: 40px;
+}
+
+.textMain {
+  color: #100a55;
+}
+
+.bgMain {
+  background-color: #100a55;
+  padding: 10px;
+  font-size: 12px;
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "50254a2f-ace5-4752-a272-d8c637966c9b",
+    "name": "Amortizing",
+    "code": "AMO"
+  },
+  {
+    "id": "0bec4c5d-16b4-4478-98b6-b7eab8292c9f",
+    "name": "Interest-Only",
+    "code": "INO"
+  }
+]

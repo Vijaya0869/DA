@@ -1,0 +1,22 @@
+[
+  {
+    "id": "8f2a8664-9e80-41d5-8444-d3362fa5aee8",
+    "name": "Wholesaling",
+    "code": "WH"
+  },
+  {
+    "id": "af6a41d5-28ae-4456-8ce1-35118d9683a3",
+    "name": "Flip",
+    "code": "FL"
+  },
+  {
+    "id": "c6e3fb44-e0a0-489e-9dcc-4e1aec43d60e",
+    "name": "Rent",
+    "code": "RE"
+  },
+  {
+    "id": "d9becb2e-1de8-4e93-8b4b-e658f155c9e1",
+    "name": "Wholetail",
+    "code": "WT"
+  }
+]

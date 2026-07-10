@@ -1,0 +1,34 @@
+  import React from 'react'
+  import ReactDOM from 'react-dom/client'
+ 
+  import './index.scss'
+  import 'container/styles'
+ 
+  import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+ 
+import AuthRoutes from './AuthRoutes'
+
+  const App = () => {
+  
+
+  
+  
+  
+    return (<>
+  {/* <Button>Welcome</Button>
+  <InputField type='search'/> */}
+  <Router>
+    <AuthRoutes/>
+          {/* <Routes>
+            <Route path="/" element={<Login />} />
+            </Routes> */}
+            </Router>
+  </>
+    )
+  }
+  const rootElement = document.getElementById('app')
+  if (!rootElement) throw new Error('Failed to find the root element')
+
+  const root = ReactDOM.createRoot(rootElement as HTMLElement)
+
+  root.render(<App />)

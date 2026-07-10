@@ -1,0 +1,28 @@
+
+<!-- Section 3: Financial Summary Card -->
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg h-100">
+    <div class="card-body p-4">
+      <h3 class="card-title h6 font-weight-semibold mb-3 text-gray-800">Rental AVM Data</h3>
+      <ul class="list-unstyled mb-0 small">
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Estimated Rental Value</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber down_payment}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Estimated Min Rental Value</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber loan_amount}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Estimated Max Rental Value</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber total_cash_needed}}</span>
+        </li>
+        <li class="border-top my-2"></li>
+        <li class="d-flex justify-content-between align-items-center small">
+          <span class="text-gray-600">Valuation Date</span>
+          <span class="font-weight-semibold text-gray-700">{{#if interest_rate}}{{interest_rate}}%{{else}}N/A{{/if}}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

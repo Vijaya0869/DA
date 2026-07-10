@@ -1,0 +1,43 @@
+.propertyDetails {
+    background-color: #f9fafb;
+  }
+  
+  /* Animation for loading spinner */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* Style for tab transitions */
+  .tab-content {
+    transition: all 0.3s ease;
+  }
+  
+  /* Custom scrollbar for description and notes */
+  .bg-gray-50::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .bg-gray-50::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .bg-gray-50::-webkit-scrollbar-thumb {
+    background: #c5c5c5;
+    border-radius: 10px;
+  }
+  
+  .bg-gray-50::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+  
+  /* Hover effects for cards */
+  .bg-gray-50:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+  }

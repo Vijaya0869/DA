@@ -1,0 +1,19 @@
+.bg-overview {
+    background-image: url("./assets/bg_svg.svg");
+    background-repeat: no-repeat;
+    object-fit: center;
+    animation: zoomInOut 10s ease-in-out infinite alternate;
+  }
+
+  .bg-rev-overview {
+    background-image: url("./assets/bg_rev.svg");
+    background-repeat: no-repeat;
+    animation: zoomInOut 10s ease-in-out infinite alternate;
+  }
+
+
+  .width-100{
+    width: 100% !important;
+    display: block;
+  }
+

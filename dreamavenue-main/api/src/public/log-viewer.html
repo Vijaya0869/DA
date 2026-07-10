@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Request Logs</title>
+
+  <!-- Google Font: Noto Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
+
+  <style>
+      body {
+          font-family: 'Noto Sans', sans-serif;
+          margin: 2rem;
+          background-color: #f9f9f9;
+      }
+
+      h2 {
+          color: #333;
+      }
+
+      input#search {
+          padding: 8px;
+          width: 300px;
+          margin-bottom: 1rem;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-family: inherit;
+      }
+
+      table {
+          width: 100%;
+          border-collapse: collapse;
+          background-color: white;
+          box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      }
+
+      th, td {
+          padding: 10px;
+          text-align: left;
+          vertical-align: top;
+          border-bottom: 1px solid #ddd;
+          font-size: 14px;
+      }
+
+      th {
+          background-color: #f0f0f0;
+      }
+
+      tr:nth-child(even) {
+          background-color: #fcfcfc;
+      }
+
+      tr:hover {
+          background-color: #f5f5f5;
+      }
+
+      .log-table-container {
+          overflow-x: auto;
+      }
+
+      .error > div {
+          background-color: #d32f2f;
+          color: #fff;
+          padding: 4px 4px;
+          border-radius: 4px;
+          font-family: monospace;
+      }
+
+      .info > div {
+          background-color: #388e3c;
+          color: #fff;
+          padding: 4px 4px;
+          border-radius: 4px;
+          font-family: monospace;
+      }
+
+      .truncate {
+          max-width: 250px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          cursor: pointer;
+          color: #3366cc;
+      }
+
+      #pagination {
+          margin-top: 1rem;
+          font-weight: bold;
+      }
+
+      .pagination-controls {
+          margin-top: 1rem;
+          display: flex;
+          gap: 10px;
+          align-items: center;
+      }
+
+      .pagination-controls button {
+          padding: 6px 12px;
+          border: none;
+          background-color: #3366cc;
+          color: white;
+          border-radius: 4px;
+          cursor: pointer;
+      }
+
+      .pagination-controls button:disabled {
+          background-color: #aaa;
+          cursor: not-allowed;
+      }
+
+      .details-row {
+          background-color: #f0f8ff;
+      }
+
+      .details-row pre {
+          background: #eee;
+          padding: 10px;
+          border-radius: 4px;
+          max-height: 300px;
+          overflow: auto;
+          font-family: monospace;
+          white-space: pre-wrap;
+          word-break: break-word;
+          font-size: 13px;
+      }
+
+      .hidden {
+          display: none;
+      }
+
+  </style>
+
+  <script>
+    let currentPage = 1;
+    let totalPages = 1;
+
+    function setupViewButtons() {
+      document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const contentRow = btn.closest('tr').nextElementSibling;
+          contentRow.classList.toggle('hidden');
+        });
+      });
+    }
+
+    async function loadLogs(page = 1) {
+      const q = document.getElementById('search').value;
+      const res = await fetch(`log-viewer?q=${encodeURIComponent(q)}&page=${page}`);
+      const json = await res.json();
+
+      currentPage = json.page;
+      totalPages = Math.ceil(json.total / json.limit);
+
+      const tbody = document.getElementById('logs');
+      tbody.innerHTML = json.data.map((log, i) => {
+        const level = log.level || 'info';
+        const method = log.method || log.message?.method || '';
+        const url = log.path || log.message?.url || '';
+        const status = log.statusCode || log.message?.statusCode || '';
+        const duration = log.duration || log.message?.duration || 0;
+
+        const requestObj = log.request || log.message?.request || {};
+        const responseObj = log.stack ? { error: log.message, stack: log.stack } : (log.message?.response || {});
+
+        const requestStr = tryPrettyJson(requestObj);
+        const responseStr = tryPrettyJson(responseObj);
+
+        return `
+        <tr class="${level}">
+          <td>${log.timestamp}</td>
+          <td class="${level}"><div>${level}</div></td>
+          <td>${method}</td>
+          <td>${url}</td>
+          <td>${status}</td>
+          <td>${duration}ms</td>
+          <td><div class="truncate toggle-btn">Show details</div></td>
+        </tr>
+        <tr class="hidden details-row">
+          <td colspan="8">
+            <strong>Request:</strong>
+            <pre>${requestStr}</pre>
+            <strong>Response:</strong>
+            <pre>${responseStr}</pre>
+          </td>
+        </tr>
+      `;
+      }).join('');
+
+      setupViewButtons();
+
+      document.getElementById('pagination').innerText =
+        `Page ${json.page} of ${totalPages}`;
+
+      document.getElementById('prevBtn').disabled = currentPage <= 1;
+      document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+    }
+
+    function tryPrettyJson(obj) {
+      try {
+        return JSON.stringify(typeof obj === 'string' ? JSON.parse(obj) : obj, null, 2);
+      } catch {
+        return String(obj);
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) loadLogs(currentPage - 1);
+    }
+
+    function nextPage() {
+      if (currentPage < totalPages) loadLogs(currentPage + 1);
+    }
+  </script>
+</head>
+<body onload="loadLogs()">
+<h2>HTTP Request Logs</h2>
+<input id="search" type="text" placeholder="Search logs..." oninput="loadLogs()" />
+
+<div class="pagination-controls">
+  <button id="prevBtn" onclick="prevPage()">Previous</button>
+  <span id="pagination">Page 1</span>
+  <button id="nextBtn" onclick="nextPage()">Next</button>
+</div>
+
+<div class="log-table-container">
+  <table>
+    <thead>
+    <tr>
+      <th>Time</th>
+      <th>Type</th>
+      <th>Method</th>
+      <th>URL</th>
+      <th>Status</th>
+      <th>Duration</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody id="logs"></tbody>
+  </table>
+</div>
+
+</body>
+</html>

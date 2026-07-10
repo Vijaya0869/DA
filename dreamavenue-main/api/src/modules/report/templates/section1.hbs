@@ -1,0 +1,171 @@
+<!-- Section 1: Top Left - Property Image & About Section -->
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg overflow-hidden">
+    <!-- Property main image with a placeholder -->
+    <img src="https://placehold.co/1200x400/E2E8F0/64748B?text=Property+Image" alt="Property Main Image"
+         class="card-img-top object-fit-cover" style="height: 256px;">
+    <div class="card-body p-4">
+      <h5 class="card-title mb-3">About the Property</h5>
+      <p class="card-text text-gray-600 mb-4">
+        {{#if description}}{{description}}{{else}}
+          Property located at {{address}}, {{city}}, {{state}} {{zip_code}}. This {{sourceData.propertyType}} property
+          was built in {{year_built}} and features {{square_feet}} square feet of living space on a {{lot_size}} square
+          foot lot.{{/if}}
+      </p>
+      <!-- Property details grid -->
+      <div class="row row-cols-2 row-cols-sm-4 g-2">
+        <div class="col">
+          <p class="font-weight-medium text-gray-500 mb-0">Bedrooms</p>
+          <p class="h6 font-weight-bold text-gray-700">{{#if bedrooms}}{{bedrooms}}{{else}}N/A{{/if}}</p>
+        </div>
+        <div class="col">
+          <p class="font-weight-medium text-gray-500 mb-0">Bathrooms</p>
+          <p class="h6 font-weight-bold text-gray-700">{{bathrooms}}</p>
+        </div>
+        <div class="col">
+          <p class="font-weight-medium text-gray-500 mb-0">Square Feet</p>
+          <p class="h6 font-weight-bold text-gray-700">{{formatNumber square_feet}} sq/ft</p>
+        </div>
+        <div class="col">
+          <p class="font-weight-medium text-gray-500 mb-0">Property Type</p>
+          <p class="h6 font-weight-bold text-gray-700">{{sourceData.propertyType}}</p>
+        </div>
+        <div class="col">
+          <p class="font-weight-medium text-gray-500 mb-0">Lot Size</p>
+          <p class="h6 font-weight-bold text-gray-700">{{formatNumber lot_size}} sq/ft</p>
+        </div>
+        <div class="col">
+          <p class="font-weight-medium text-gray-500 mb-0">Year Built</p>
+          <p class="h6 font-weight-bold text-gray-700">{{year_built}}</p>
+        </div>
+        <div class="col">
+          <p class="font-weight-medium text-gray-500 mb-0">MLS Number</p>
+          <p class="h6 font-weight-bold text-gray-700">{{mls_number}}</p>
+        </div>
+        <div class="col">
+          <p class="font-weight-medium text-gray-500 mb-0">Strategy</p>
+          <p class="h6 font-weight-bold text-success">{{investment_strategy}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Owner Information -->
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg h-100">
+    <div class="card-body p-4">
+      <h5 class="card-title mb-3">Owner Information</h5>
+      <ul class="list-unstyled mb-0">
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Owner Type</span>
+          <span class="font-weight-semibold text-gray-700">{{sourceData.owner.type}}</span>
+        </li>
+        <li class="mb-2">
+          <span class="text-gray-600">Owner Name(s)</span>
+          <div class="mt-1">
+            {{#each sourceData.owner.names}}
+              <span class="font-weight-semibold text-gray-700 d-block">{{this}}</span>
+            {{/each}}
+          </div>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Owner Occupied</span>
+          <span class="font-weight-semibold {{#if sourceData.ownerOccupied}}text-success{{else}}text-warning{{/if}}">
+            {{#if sourceData.ownerOccupied}}Yes{{else}}No{{/if}}
+          </span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center">
+          <span class="text-gray-600">Last Sale Date</span>
+          <span class="font-weight-semibold text-gray-700">{{formatDate sourceData.lastSaleDate}}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Property Features -->
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg h-100">
+    <div class="card-body p-4">
+      <h5 class="card-title mb-3">Property Features</h5>
+      <ul class="list-unstyled mb-0">
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Unit Count</span>
+          <span class="font-weight-semibold text-gray-700">{{sourceData.features.unitCount}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Floor Count</span>
+          <span class="font-weight-semibold text-gray-700">{{sourceData.features.floorCount}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Heating</span>
+          <span class="font-weight-semibold text-gray-700">{{sourceData.features.heatingType}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Cooling</span>
+          <span class="font-weight-semibold text-gray-700">{{sourceData.features.coolingType}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Roof Type</span>
+          <span class="font-weight-semibold text-gray-700">{{sourceData.features.roofType}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center">
+          <span class="text-gray-600">Foundation</span>
+          <span class="font-weight-semibold text-gray-700">{{sourceData.features.foundationType}}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Section 8: Location Information -->
+<div class="col-8">
+  <div class="card shadow-sm rounded-lg p-4">
+    <h5 class="card-title mb-3">Location Information</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <ul class="list-unstyled mb-0">
+          <li class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-gray-600">Full Address</span>
+            <span class="font-weight-semibold text-gray-700">{{full_address}}</span>
+          </li>
+          <li class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-gray-600">County</span>
+            <span class="font-weight-semibold text-gray-700">{{sourceData.county}}</span>
+          </li>
+          <li class="d-flex justify-content-between align-items-center">
+            <span class="text-gray-600">Subdivision</span>
+            <span class="font-weight-semibold text-gray-700">{{sourceData.subdivision}}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <ul class="list-unstyled mb-0">
+          <li class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-gray-600">Latitude</span>
+            <span class="font-weight-semibold text-gray-700">{{sourceData.latitude}}</span>
+          </li>
+          <li class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-gray-600">Longitude</span>
+            <span class="font-weight-semibold text-gray-700">{{sourceData.longitude}}</span>
+          </li>
+          <li class="d-flex justify-content-between align-items-center">
+            <span class="text-gray-600">Assessor ID</span>
+            <span class="font-weight-semibold text-gray-700">{{sourceData.assessorID}}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Section 10: Notes and Additional Information -->
+{{#if notes}}
+  <div class="col-8">
+    <div class="card shadow-sm rounded-lg p-4">
+      <h5 class="card-title mb-3">Notes</h5>
+      <p class="text-gray-600 mb-0">{{notes}}</p>
+    </div>
+  </div>
+{{/if}}
+

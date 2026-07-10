@@ -1,0 +1,32 @@
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg h-100">
+    <div class="card-body p-4">
+      <h5 class="card-title mb-3">Mortgage History</h5>
+      <div class="table-responsive">
+        <table class="table table-borderless">
+          <thead>
+          <tr class="border-bottom">
+            <th scope="col">DATE</th>
+            <th scope="col">AMOUNT</th>
+            <th scope="col">LENDER</th>
+            <th scope="col">TYPE</th>
+            <th scope="col">DUE DATE</th>
+          </tr>
+          </thead>
+          <tbody>
+
+          {{#each sourceData.mortgageHistory}}
+            <tr>
+              <td class="fw-bold">{{saleDate}}</td>
+              <td>${{formatNumber salePrice}}</td>
+              <td>{{lenderContactName}}-{{lenderEntityName}}</td>
+              <td>{{saleType}}</td>
+              <td>{{formatDate maturityDate}}</td>
+            </tr>
+          {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

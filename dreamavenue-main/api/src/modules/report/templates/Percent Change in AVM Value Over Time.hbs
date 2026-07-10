@@ -1,0 +1,103 @@
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg h-100">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="card-title fw-bold m-0">Percent Change in AVM Value Over Time</h4>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="avmChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Sample data for the chart based on the provided images
+    const chartData = {
+      labels: ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+      datasets: [{
+        label: 'AVM Value',
+        data: [2, 3.2, 2.8, 4.0, 4.0, 5.5, 2.9, 4.2, 2.8, 4.8], // Sample values
+        borderColor: '#198754', // Bootstrap 'success' color
+        backgroundColor: 'transparent',
+        pointBackgroundColor: '#198754',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#198754',
+        pointHoverBorderColor: '#198754',
+        tension: 0.4, // Smooths the line
+        borderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 8
+      }]
+    };
+
+    const config = {
+      type: 'line',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'AVM Value'
+            },
+            ticks: {
+              callback: function(value) {
+                return '$' + value; // Add dollar sign to y-axis labels
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false // Hide the dataset legend
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += '$' + context.parsed.y;
+                }
+                return label;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    // Initialize the chart
+    const avmChart = new Chart(
+      document.getElementById('avmChart'),
+      config
+    );
+
+    // Handle the switch for "Histogram"
+    document.getElementById('histogramSwitch').addEventListener('change', function(event) {
+      if (event.target.checked) {
+        // Change chart type to 'bar' for histogram
+        avmChart.config.type = 'bar';
+      } else {
+        // Change chart type back to 'line'
+        avmChart.config.type = 'line';
+      }
+      avmChart.update();
+    });
+  });
+</script>

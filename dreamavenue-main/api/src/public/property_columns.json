@@ -1,0 +1,158 @@
+[
+  {
+    "column_name": "address",
+    "description": "Street address of the property",
+    "data_type": "Text",
+    "required": true
+  },
+  {
+    "column_name": "city",
+    "description": "City where the property is located",
+    "data_type": "Text",
+    "required": true
+  },
+  {
+    "column_name": "state",
+    "description": "State where the property is located",
+    "data_type": "Text",
+    "required": true
+  },
+  {
+    "column_name": "zip_code",
+    "description": "Postal code of the property",
+    "data_type": "Text",
+    "required": true
+  },
+  {
+    "column_name": "title",
+    "description": "Title or name of the listing",
+    "data_type": "Text",
+    "required": true
+  },
+  {
+    "column_name": "property_type",
+    "description": "Property type",
+    "data_type": "Text",
+    "required": true
+  },
+  {
+    "column_name": "description",
+    "description": "Detailed description of the property",
+    "data_type": "Long Text"
+  },
+  {
+    "column_name": "notes",
+    "description": "Additional notes or comments",
+    "data_type": "Long Text"
+  },
+  {
+    "column_name": "tags_n_labels",
+    "description": "Tags or labels associated with the property",
+    "data_type": "Long Text"
+  },
+  {
+    "column_name": "zoning",
+    "description": "Zoning classification of the property",
+    "data_type": "Long Text"
+  },
+  {
+    "column_name": "mls_number",
+    "description": "MLS (Multiple Listing Service) identification number",
+    "data_type": "Text"
+  },
+  {
+    "column_name": "purchase_price",
+    "description": "Price paid to purchase the property",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "closing_costs",
+    "description": "Costs incurred during the property closing process",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "after_repair_value",
+    "description": "Estimated value of the property after repairs",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "rehab_costs",
+    "description": "Cost of repairing or renovating the property",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "selling_costs",
+    "description": "Costs associated with selling the property",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "holding_costs",
+    "description": "Costs incurred while holding the property before sale",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "location",
+    "description": "General location description of the property",
+    "data_type": "Text"
+  },
+  {
+    "column_name": "bedrooms",
+    "description": "Number of bedrooms in the property",
+    "data_type": "Whole Number"
+  },
+  {
+    "column_name": "parking",
+    "description": "Number of available parking spots",
+    "data_type": "Whole Number"
+  },
+  {
+    "column_name": "bathrooms",
+    "description": "Number of bathrooms in the property",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "year_built",
+    "description": "Year the property was originally built",
+    "data_type": "Whole Number"
+  },
+  {
+    "column_name": "listing_price",
+    "description": "Price at which the property is listed for sale",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "estimated_arv",
+    "description": "Estimated After Repair Value (ARV) of the property",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "estimated_rent",
+    "description": "Estimated monthly rent the property can generate",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "square_feet",
+    "description": "Total area of the property in square feet",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "lot_size",
+    "description": "Size of the land lot in square feet or acres",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "purchase_costs",
+    "description": "Total cost associated with acquiring the property",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "rehab_cost_overrun",
+    "description": "Additional unexpected costs incurred during rehab",
+    "data_type": "Decimal Number"
+  },
+  {
+    "column_name": "rehab_cost_holding_period",
+    "description": "Duration in days/months the property is held during rehab",
+    "data_type": "Whole Number"
+  }
+]

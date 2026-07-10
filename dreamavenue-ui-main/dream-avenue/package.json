@@ -1,0 +1,29 @@
+{
+    "name": "dream-avenue",
+    "version": "1.0.0",
+    "private": true,
+    "workspaces": [
+        "apps/*"
+    ],
+    "scripts": {
+        "start": "concurrently \"npm start --workspace=apps/auth\" \"npm start --workspace=apps/main\" \"npm start --workspace=apps/property\"  \"npm start --workspace=apps/ui\"  \"npm start --workspace=apps/website\"",
+        "build": "npm run build --workspaces --if-present"
+    },
+    "devDependencies": {
+        "@babel/preset-typescript": "^7.26.0",
+        "@types/react-modal": "^3.16.3",
+        "concurrently": "^9.1.2"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.0",
+        "@headlessui/react": "^2.2.0",
+        "leaflet": "^1.9.4",
+        "react-dom": "^18.3.1",
+        "react-hot-toast": "^2.5.2",
+        "react-modal": "^3.16.3",
+        "react-select": "^5.10.1",
+        "recharts": "^2.15.1",
+        "xlsx": "^0.18.5"
+    }
+}

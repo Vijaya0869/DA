@@ -1,0 +1,49 @@
+<!-- Section 2: Top Right - Quick Stats & Documents -->
+<div class="col-lg-8">
+  <div class="row g-4 h-100">
+    <!-- Investment Overview Card -->
+    <div class="col-12">
+      <div class="card shadow-sm rounded-lg h-100">
+        <div class="card-body p-4">
+          <h5 class="card-title mb-3">Investment Overview</h5>
+          <ul class="list-unstyled mb-0">
+            <li class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-gray-600">Listing Price</span>
+              <span class="font-weight-bold text-success">${{formatNumber listing_price}}</span>
+            </li>
+            <li class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-gray-600">Estimated ARV</span>
+              <span class="font-weight-bold text-success">${{formatNumber estimated_arv}}</span>
+            </li>
+            <li class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-gray-600">Price per Sq/Ft</span>
+              <span class="font-weight-bold text-success">${{formatDecimal price_per_square_foot}}</span>
+            </li>
+            <li class="d-flex justify-content-between align-items-center">
+              <span class="text-gray-600">ARV per Sq/Ft</span>
+              <span class="font-weight-bold text-success">${{formatDecimal arv_per_square_foot}}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Property Tax Information -->
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg h-100">
+    <div class="card-body p-4">
+      <h5 class="card-title mb-3">Property Tax History</h5>
+      <ul class="list-unstyled mb-0">
+        {{#each sourceData.assessmentHistory}}
+          <li class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-gray-600">{{assessmentYear}}</span>
+            <span class="font-weight-semibold text-gray-700">${{formatNumber totalAssessedValue}}</span>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+.bgcircuitsvg {
+  background-image: url("../../../assets/images/propertyCircuit.svg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

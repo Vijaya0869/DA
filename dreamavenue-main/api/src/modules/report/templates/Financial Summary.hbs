@@ -1,0 +1,57 @@
+
+<!-- Section 3: Financial Summary Card -->
+<div class="col-lg-8">
+  <div class="card shadow-sm rounded-lg h-100">
+    <div class="card-body p-4">
+      <h3 class="card-title h6 font-weight-semibold mb-3 text-gray-800">Financial Summary</h3>
+      <ul class="list-unstyled mb-0">
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Down Payment</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber down_payment}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Loan Amount</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber loan_amount}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Total Cash Needed</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber total_cash_needed}}</span>
+        </li>
+        <li class="border-top my-2"></li>
+        <li class="d-flex justify-content-between align-items-center">
+          <span class="text-gray-600">Interest Rate</span>
+          <span class="font-weight-semibold text-gray-700">{{#if interest_rate}}{{interest_rate}}%{{else}}N/A{{/if}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center">
+          <span class="text-gray-600">Loan Term</span>
+          <span class="font-weight-semibold text-gray-700">{{#if loan_term}}{{loan_term}} years{{else}}N/A{{/if}}</span>
+        </li>
+
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Monthly Mortgage Payment</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber closing_costs}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Estimated Rental Income</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber closing_costs}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Estimated Annual Property Taxes</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber closing_costs}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Estimated ARV</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber closing_costs}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Other Annual Expenses</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber closing_costs}}</span>
+        </li>
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-gray-600">Estimated Annual Insurance Costs</span>
+          <span class="font-weight-semibold text-gray-700">${{formatNumber closing_costs}}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
