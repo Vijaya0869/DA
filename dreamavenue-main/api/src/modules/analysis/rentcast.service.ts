@@ -68,18 +68,21 @@ export class RentcastService {
     if (!propQuery) {
       let rentCastData = null;
 
-      try {
-        const url = `${this.baseUrl}/properties`;
-        const response$ = this.httpService.get(url, {
-          params: { address: address },
-          headers: {
-            'X-Api-Key': this.apiKey,
-          },
-        });
-        const { data } = await firstValueFrom(response$);
-        rentCastData = data.length > 0 ? data[0] : null;
-      } catch (exception) {
-        console.error(exception);
+      if (address) {
+        try {
+          const url = `${this.baseUrl}/properties`;
+          const response$ = this.httpService.get(url, {
+            params: { address: address },
+            headers: {
+              'X-Api-Key': this.apiKey,
+            },
+            timeout: RentcastService.THIRD_PARTY_TIMEOUT_MS,
+          });
+          const { data } = await firstValueFrom(response$);
+          rentCastData = data.length > 0 ? data[0] : null;
+        } catch (exception) {
+          console.error(exception);
+        }
       }
       rentCastData = rentCastData || {};
       const thirdPartyData =
@@ -438,67 +441,82 @@ export class RentcastService {
     return merged;
   }
 
-  public async getDataFromThirdPartyService(address: string): Promise<any> {
-    const response = await axios.get(
-      'https://www.enrichedrealestate.com/SearchByAddress',
-      {
-        params: {
-          inputs: `{ "address": "${address}"}`,
-        },
-      },
-    );
-    const propertyDetails = response.data.property[0];
-    if (propertyDetails) {
-      const [
-        salesHistoryRes,
-        mortgageHistoryRes,
-        assessmentHistoryRes,
-        rentRollRes,
-      ] = await Promise.all([
-        axios.get(
-          'https://www.enrichedrealestate.com/GetSaleAndMortgageHistoryByPropertyId',
-          {
-            params: {
-              propertyId: propertyDetails.id,
-              transactionTypeId: '1',
-              propertyTypeId: '1',
-            },
-          },
-        ),
-        axios.get(
-          'https://www.enrichedrealestate.com/GetSaleAndMortgageHistoryByPropertyId',
-          {
-            params: {
-              propertyId: propertyDetails.id,
-              transactionTypeId: '3',
-              propertyTypeId: '1',
-            },
-          },
-        ),
-        axios.get(
-          'https://www.enrichedrealestate.com/GetAssessmentHistoryByPropertyId',
-          {
-            params: {
-              propertyId: propertyDetails.id,
-            },
-          },
-        ),
-        axios.get(
-          'https://www.enrichedrealestate.com/GetRentRollyDetailsByPropertyId',
-          {
-            params: {
-              propertyId: propertyDetails.id,
-            },
-          },
-        ),
-      ]);
+  private static readonly THIRD_PARTY_TIMEOUT_MS = 10000;
 
-      propertyDetails.salesHistory = salesHistoryRes.data;
-      propertyDetails.mortgageHistory = mortgageHistoryRes.data;
-      propertyDetails.assessmentHistory = assessmentHistoryRes.data;
-      propertyDetails.rentRoll = rentRollRes.data.propertyRentRollDetails;
+  public async getDataFromThirdPartyService(address: string): Promise<any> {
+    if (!address) {
+      return {};
     }
-    return propertyDetails || {};
+    try {
+      const response = await axios.get(
+        'https://www.enrichedrealestate.com/SearchByAddress',
+        {
+          params: {
+            inputs: `{ "address": "${address}"}`,
+          },
+          timeout: RentcastService.THIRD_PARTY_TIMEOUT_MS,
+        },
+      );
+      const propertyDetails = response.data?.property?.[0];
+      if (propertyDetails) {
+        const [
+          salesHistoryRes,
+          mortgageHistoryRes,
+          assessmentHistoryRes,
+          rentRollRes,
+        ] = await Promise.all([
+          axios.get(
+            'https://www.enrichedrealestate.com/GetSaleAndMortgageHistoryByPropertyId',
+            {
+              params: {
+                propertyId: propertyDetails.id,
+                transactionTypeId: '1',
+                propertyTypeId: '1',
+              },
+              timeout: RentcastService.THIRD_PARTY_TIMEOUT_MS,
+            },
+          ),
+          axios.get(
+            'https://www.enrichedrealestate.com/GetSaleAndMortgageHistoryByPropertyId',
+            {
+              params: {
+                propertyId: propertyDetails.id,
+                transactionTypeId: '3',
+                propertyTypeId: '1',
+              },
+              timeout: RentcastService.THIRD_PARTY_TIMEOUT_MS,
+            },
+          ),
+          axios.get(
+            'https://www.enrichedrealestate.com/GetAssessmentHistoryByPropertyId',
+            {
+              params: {
+                propertyId: propertyDetails.id,
+              },
+              timeout: RentcastService.THIRD_PARTY_TIMEOUT_MS,
+            },
+          ),
+          axios.get(
+            'https://www.enrichedrealestate.com/GetRentRollyDetailsByPropertyId',
+            {
+              params: {
+                propertyId: propertyDetails.id,
+              },
+              timeout: RentcastService.THIRD_PARTY_TIMEOUT_MS,
+            },
+          ),
+        ]);
+
+        propertyDetails.salesHistory = salesHistoryRes.data;
+        propertyDetails.mortgageHistory = mortgageHistoryRes.data;
+        propertyDetails.assessmentHistory = assessmentHistoryRes.data;
+        propertyDetails.rentRoll = rentRollRes.data.propertyRentRollDetails;
+      }
+      return propertyDetails || {};
+    } catch (exception) {
+      console.error('enrichedrealestate.com lookup failed:', exception.message);
+      return {};
+    }
   }
 
   private fillMissingData(

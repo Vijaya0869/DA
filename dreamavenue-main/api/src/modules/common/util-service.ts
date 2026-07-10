@@ -13,7 +13,10 @@ export class UtilService {
     let country = '';
 
     // First try comma-based parsing
-    const parts = trimmed.split(',').map((p) => p.trim());
+    const parts = trimmed
+      .split(',')
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
 
     if (parts.length === 4) {
       [streetName, city, state, zip] = parts;
@@ -21,12 +24,55 @@ export class UtilService {
       [name, streetName, city, state, zip] = parts;
     } else if (parts.length === 6) {
       [name, streetName, city, state, zip, country] = parts;
+    } else if (parts.length >= 1 && parts.length <= 3) {
+      // Partial input with no street address - e.g. just a city, "City, State",
+      // or "State, Country". This is a normal, legitimate way to search (not
+      // every search is for a specific street address), so make a best-effort
+      // assignment instead of failing.
+      const isCountryLike = (p: string) => /^(united states|usa|us)$/i.test(p);
+      if (parts.length === 1) {
+        city = parts[0];
+      } else if (parts.length === 2) {
+        if (isCountryLike(parts[1])) {
+          [state, country] = parts;
+        } else {
+          [city, state] = parts;
+        }
+      } else {
+        [city, state, country] = parts;
+      }
     } else {
-      // Try space-separated fallback
-      const tokens = trimmed.split(/\s+/);
+      // No commas at all (or a comma count we can't make sense of) - try a
+      // space-separated fallback, e.g. "123 Main St Springfield IL 12345".
+      const tokens = trimmed.split(/\s+/).filter((t) => t.length > 0);
+
+      if (tokens.length === 0) {
+        return {
+          name,
+          streetNumber,
+          streetName,
+          city,
+          state,
+          zip,
+          country,
+          address,
+        };
+      }
 
       if (tokens.length < 4) {
-        throw new Error('Unrecognized address format: ' + address);
+        // Not enough tokens to confidently locate street/city/state/zip -
+        // treat the whole input as a place name rather than failing outright.
+        city = tokens.join(' ');
+        return {
+          name,
+          streetNumber,
+          streetName,
+          city,
+          state,
+          zip,
+          country,
+          address,
+        };
       }
 
       // Try pattern: <street number> <street name...> <city...> <state> <zip>
