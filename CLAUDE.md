@@ -1,0 +1,134 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Repository layout
+
+This directory holds two independent, non-git-tracked projects that together make up the Dream Avenue app:
+
+- `dreamavenue-main/api/` — NestJS backend (TypeORM + Postgres/PostGIS, Redis, BullMQ)
+- `dreamavenue-ui-main/dream-avenue/` — React micro-frontend monorepo (webpack Module Federation, npm workspaces)
+- `dreamavenue-roadmap.txt` — a phased fix/feature roadmap for the project (Phase 1 critical fixes → Phase 2 finish half-built features → Phase 3 tests → Phase 4 new features)
+
+Neither project is a git repository, so there is no commit history or blame to consult — treat the working tree as the only source of truth.
+
+## Running the stack locally
+
+The frontend was originally hardcoded to call a remote server (`test.dreamavenue.ai/backend`) which is dead (502). A full local backend stack replaces it. To bring everything up from scratch:
+
+```bash
+# 1. Docker containers (Postgres/PostGIS + Redis), from dreamavenue-main/api/
+docker compose up -d postgres redis
+docker run -d --name mailhog -p 1025:1025 -p 8025:8025 mailhog/mailhog   # fake SMTP, web UI at :8025
+
+# 2. Backend — MUST use Node 20, not a newer system default (Node 22+ breaks a JWT
+#    dependency: buffer-equal-constant-time / SlowBuffer removed in later Node)
+cd dreamavenue-main/api
+PATH="/opt/homebrew/opt/node@20/bin:$PATH" npm run start:dev   # NestJS on :4000
+
+# 3. Frontend, from dreamavenue-ui-main/dream-avenue/
+npm start   # runs auth, main, property, ui, website dev servers concurrently
+```
+
+**Use `http://localhost:3002` (the `main` app) to exercise the app**, not the individual sub-app ports. Each micro-frontend has its own isolated router in dev; only `main` composes `website` + `auth` + `property` routes into a working whole. Visiting `website` alone (3004) and clicking Login/Sign Up navigates its own router to a route it doesn't have and renders blank.
+
+`dreamavenue-main/api/.env` is required and gitignored — it is not recoverable from the repo. Notable keys: `DB_USER`/`DB_PASSWORD`/`DB_NAME` for Postgres, `JWT_SECRET`, `SMTP_*` pointed at MailHog, `LOAD_DATA=true` (required to seed master data on boot — see Known gotchas below), OAuth client IDs (dummy values are fine, but *some* value must be present or the app crashes on boot), `RENTCAST_API_KEY`/`DATAFINITI_API_KEY`/`HERE_API_KEY` (blank in dev — property search falls back to mock data via `DEV_MODE=true`).
+
+## Backend (`dreamavenue-main/api`)
+
+NestJS app, entry point `src/main.ts`. Key commands (run from `api/`):
+
+```bash
+npm run start:dev          # watch mode, port 4000
+npm run lint                # eslint --fix over src/apps/libs/test
+npm run test                # jest unit tests
+npm run test -- <pattern>   # run a single test file/suite
+npm run test:e2e            # jest e2e (test/jest-e2e.json)
+npm run migration:generate -n <Name>   # generate a TypeORM migration from entity diffs
+npm run migration:run                  # apply migrations (uses ormconfig.ts)
+npm run migration:revert
+```
+
+Structure:
+- `src/modules/` — one folder per domain: `auth`, `user`, `property`, `master` (reference data: states/cities/property types/investment strategies), `analysis`, `queue` (BullMQ), `report`, `bulk_upload`, `log-viewer`, `common`.
+- `src/app.module.ts` is the composition root — import order here matters in this codebase (see gotcha below).
+- `ormconfig.ts` (used by the `typeorm`/`migration:*` CLI scripts) and `src/config/database.config.ts` (used by `TypeOrmModule.forRoot()` at runtime) are two **separate, hand-maintained** DB configs — keep entity/migration globs in sync between them when changing build output paths.
+- Auth uses Passport strategies under `modules/auth/strategies` (local, JWT, Google, Facebook) plus `guards/`. Note: `JwtAuthGuard` currently isn't applied to any controller — there is no enforced auth on API routes yet.
+- Master/reference data (`city`, `state`, `property_type`, `investment_strategy`) is bulk-seeded by `MasterDataService.onModuleInit()`, gated entirely behind `process.env.LOAD_DATA` — seeding silently no-ops if that env var is unset.
+
+### Known gotchas worth knowing before debugging something that "shouldn't be possible"
+
+- **`main.ts` must load dotenv itself.** There's no explicit `import 'dotenv/config'` guarantee elsewhere; env vars can otherwise only get populated as a side effect of `ConfigModule.forRoot()` inside `modules/queue/bullmq.module.ts`, which is imported *after* `AuthModule`/mailer setup in `app.module.ts` — meaning anything read before that import point sees `undefined`.
+- **`@nestjs-modules/mailer`'s `defaults.from` config does not apply in the installed version.** Set `emailDto.from` explicitly per call site (see `auth.controller.ts`) rather than relying on mailer module defaults.
+- **The `city` table has a UNIQUE constraint on `name` alone**, not `(name, state_id)`. The seed data (`src/data/cities.json`, ~28k rows) has genuine same-name cities in different states, so seeding crashes on first duplicate and `city` ends up empty — which breaks any UI flow that depends on a City dropdown (e.g. "Enter Manually" add-property). Changing the constraint to a composite key requires a migration.
+- **`google.strategy.ts`** returns the raw OAuth profile instead of calling `validateOAuthLogin` (the way `facebook.strategy.ts` does) — Google login never creates or looks up a user.
+- **Bracket-notation query params (`filters[email]=x`) don't survive this app's request pipeline** — `req.query` ends up with a literal flat key `"filters[email]"` instead of a nested `filters: { email: 'x' }` object (traced down to raw Express `req.query`, so it's happening before Nest's validation layer even runs, not a `class-validator`/`class-transformer` issue). Anything using `SearchCriteria` (`filters`, `orderBy`) — `/users/GetUsersList`, `/property` — must instead pass a single JSON-encoded query param, e.g. `?filters={"lastName":"Johnson"}`. `search.criteria.ts` has a `@Transform` that JSON-parses these two fields; this is enforced there, not per-endpoint.
+- **`SearchCriteria`-based `applyFilters` implementations must allowlist filterable columns** (see `user.service.ts`'s `FILTERABLE_COLUMNS`) — the filter object's *keys* come straight from client input and get spliced into the raw SQL string (TypeORM can't parameterize a column/field name), so an un-allowlisted key is a SQL injection vector. `property.service.ts`'s `applyFilters` does **not** do this yet — it accepts any key from `criteria.filters` unfiltered. Worth the same fix if that endpoint is ever exposed to less-trusted input.
+- **RentCast/Datafiniti/the free enrichedrealestate.com scrape can each independently fuzzy-match a searched address to a *different* real property** when the exact address doesn't exist (they don't cross-validate against each other). `rentcast.service.ts`'s `getPropertyDataByAddressOrUniqueId` now discards the third-party scrape's data if its city/state doesn't match the parsed search target, rather than blending two unrelated properties' data into one record. `mergePropertyData` (the Datafiniti merge path) also used to overwrite its own careful field-by-field fallback merge with a blind `{ ...merged, ...rentcastData, ...datafinitiRecord }` spread at the end — fixed to just `return merged`. Datafiniti's path is currently dormant (`DATAFINITI_API_KEY` is blank), so that specific fix isn't exercised by any live traffic yet.
+
+## Frontend (`dreamavenue-ui-main/dream-avenue`)
+
+npm workspaces monorepo (`apps/*`), each app is an independent webpack 5 dev server wired together via Module Federation (`webpack/lib/container/ModuleFederationPlugin`). React 18 + TypeScript, Tailwind for styling, react-router-dom v6.
+
+| App | Workspace | Port | Federation role |
+|---|---|---|---|
+| `container` (folder `apps/ui`) | shared components/utilities/styles | 3000 | exposes `./components`, `./arrayUtils`, `./storage`, `./stringUtils`, `./styles`; consumed by every other app as `container` |
+| `website` | marketing/landing pages | 3004 | exposes `./WebRoutes`; consumes `container` |
+| `auth` | login/signup | 3008 | exposes `./AuthRoutes`; consumes `container` |
+| `property` | property search/dashboard | 3006 | exposes `./PropertyRoutes`; consumes `container` |
+| `main` | shell app that composes everything | 3002 | consumes `container`, `auth`, `property`, `website` (all as remotes); this is the only app with all routes wired together |
+
+Commands (from `dreamavenue-ui-main/dream-avenue/`):
+
+```bash
+npm start                              # all 5 apps concurrently (root script)
+npm start --workspace=apps/<name>      # a single app's dev server
+npm run build                          # build --workspaces --if-present
+```
+
+Each app also has `webpack --mode production`, `build:dev`, and `build:start` (serves the `dist/` build) scripts — see each app's own `package.json`.
+
+Both `apps/auth/src/Axios/Axios.tsx` and `apps/property/src/Axios/Axios.tsx` hardcode `baseURL: "http://localhost:4000"` — this is the local NestJS backend. If the backend runs on a different host/port, both files need updating (there's no shared config/env indirection for this yet).
+
+### Known gaps in the frontend (dead UI, not runtime bugs)
+
+A number of nav items and buttons are scaffolded in the UI but never wired to a handler or route — e.g. several "Browse Properties"/"Save Property"/"Compare" buttons with no `onClick`, and a `Dashboard` import in `apps/main/src/App.tsx` (`./features/dashboard/dashboard`) that doesn't exist on disk. Before assuming a reported "button does nothing" issue is a logic bug, check whether the handler exists at all.
+
+Three features have full DB schema (tables exist) but zero backend implementation: **Fractional Investment**, **Marketing Campaigns**, and **AI-powered analysis** — don't expect a service/controller to exist for these yet.
+
+### Sidebar items removed 2026-07-09 (`apps/ui/src/components/Sidebar/Sidebar.tsx`)
+
+Dashboard, Fractional Investment, Marketing, Templates, and Resources were removed from the sidebar's `menuItems` array because none had a working route — only "Explore Property" had a `path`, so the rest just sat there doing nothing when clicked. The `.svg` assets themselves were left in place under `@/assets/images/`; only the imports and array entries in `Sidebar.tsx` were deleted. To bring any of them back once their route/page actually exists:
+
+```tsx
+// imports (paired icon + hover-icon per item)
+import Dashboard from '@/assets/images/dashboard.svg';
+import DashboardN from '@/assets/images/dashboard_n.svg';
+import Fractional from '@/assets/images/fractional.svg';
+import FractionalN from '@/assets/images/fractional_n.svg';
+import Marketing from '@/assets/images/marketing.svg';
+import MarketingN from '@/assets/images/marketing_n.svg';
+import Template from '@/assets/images/template.svg';
+import TemplateN from '@/assets/images/template_n.svg';
+import Resources from '@/assets/images/resources.svg';
+import ResourcesN from '@/assets/images/resources_n.svg';
+
+// menuItems entries (original order: Explore Property, Dashboard, Fractional Investment, Marketing, Templates, Resources)
+{
+  name: "Dashboard",
+  icon: DashboardN, hIcon: Dashboard,
+  subItems: ["Rental", "Flip", "Wholesale", "Wholetail"],
+},
+{ name: "Fractional Investment", icon: FractionalN, hIcon: Fractional },
+{ name: "Marketing", icon: MarketingN, hIcon: Marketing },
+{ name: "Templates", icon: TemplateN, hIcon: Template },
+{ name: "Resources", icon: ResourcesN, hIcon: Resources },
+```
+
+What's blocking each one from being real again:
+- **Dashboard** — target page doesn't exist (`apps/main/src/App.tsx` imports `./features/dashboard/dashboard`, which isn't on disk). Its `subItems` (Rental/Flip/Wholesale/Wholetail) also render as plain `<li>`s with no click handler — those need routes too.
+- **Fractional Investment** — matches the `fractional_investment` DB table, but no backend controller/service or frontend route exists yet.
+- **Marketing** — matches `marketing_campaign`/`campaign_property` DB tables, same situation: no backend or frontend built.
+- **Templates** / **Resources** — no matching backend feature found at all; unclear what these were originally meant to link to.
+
+Don't re-add any of these with a real `path` until the underlying route/page exists — that's what caused them to be dead links in the first place.
